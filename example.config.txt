@@ -1,0 +1,8 @@
+meeting_number: "6638319659"
+token: ""
+meeting_password: ""
+recording_token: ""
+GetVideoRawData: "true"
+GetAudioRawData: "true"
+SendVideoRawData: "false"
+SendAudioRawData: "false"
