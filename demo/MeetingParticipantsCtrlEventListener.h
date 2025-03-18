@@ -1,10 +1,8 @@
 // MeetingParticipantsCtrlEventListener.h
 #pragma once
 #include "zoom_sdk.h" // Foundational SDK header
-#include "meeting_service_components/meeting_participants_ctrl_interface.h"
-
-// Explicitly include meeting_audio_interface.h with full path if needed
-#include "h/meeting_service_components/meeting_audio_interface.h" // Adjust based on location
+#include "h/meeting_service_components/meeting_audio_interface.h" // Define AudioType first
+#include "h/meeting_service_components/meeting_participants_ctrl_interface.h" // Uses AudioType
 #include <functional>
 
 using namespace ZOOMSDK;
