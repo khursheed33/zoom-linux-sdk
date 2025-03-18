@@ -1,28 +1,28 @@
-//SendVideoRawData
+// ZoomSDKVideoSource.h
+#pragma once
+#include "zoom_sdk.h"
+#include "h/rawdata/zoom_rawdata_api.h" // For IZoomSDKVideoSource
+#include <cstdint> // For uint8_t
 
-
-#include <string>
-#include "rawdata/rawdata_video_source_helper_interface.h"
-
-constexpr auto WIDTH = 640;
-constexpr auto HEIGHT = 480;
-
-using namespace std;
 using namespace ZOOMSDK;
 
-class ZoomSDKVideoSource :
-	public IZoomSDKVideoSource
-{
-private:
-	IZoomSDKVideoSender* video_sender_;
-	std::string video_source_;
-protected:
-	virtual	void onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability >* support_cap_list, VideoSourceCapability& suggest_cap);
-	virtual void onPropertyChange(IList<VideoSourceCapability >* support_cap_list, VideoSourceCapability suggest_cap);
-	virtual void onStartSend();
-	virtual void onStopSend();
-	virtual void onUninitialized();
-public:
-	ZoomSDKVideoSource(std::string video_source);
-};
+// Constants defined only here
+constexpr int WIDTH = 640;
+constexpr int HEIGHT = 480;
 
+class ZoomSDKVideoSource : public IZoomSDKVideoSource {
+public:
+    ZoomSDKVideoSource();
+    virtual ~ZoomSDKVideoSource();
+
+    // IZoomSDKVideoSource interface methods
+    virtual void onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& current_cap);
+    virtual void onDeviceStatusChanged(VideoSourceDeviceStatus status) {}
+    virtual void onStartSend();
+    virtual void onStopSend();
+    virtual void onUninitialized();
+
+private:
+    IZoomSDKVideoSender* videoSender_;
+    uint8_t* frameBuffer_; // Example buffer for video frames
+};
