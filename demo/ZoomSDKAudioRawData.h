@@ -1,14 +1,14 @@
 // ZoomSDKAudioRawData.h
 #pragma once
 #include "zoom_sdk.h"
-#include "h/rawdata/zoom_rawdata_api.h" // Defines AudioRawData
-#include "h/rawdata/rawdata_audio_helper_interface.h" // Defines IAudioRawDataDelegate and IZoomSDKAudioRawDataDelegate
+#include "h/rawdata/zoom_rawdata_api.h" // Should define AudioRawData fully
+#include "h/rawdata/rawdata_audio_helper_interface.h" // Defines IZoomSDKAudioRawDataDelegate
 #include <functional>
+#include <cstdio> // For FILE
 
 using namespace ZOOMSDK;
 
-// Ensure inheritance from the correct interface
-class ZoomSDKAudioRawData : public IZoomSDKAudioRawDataDelegate { // Changed to IZoomSDKAudioRawDataDelegate
+class ZoomSDKAudioRawData : public IZoomSDKAudioRawDataDelegate {
 private:
     FILE* mixedAudioFile;
     std::function<void(const char*, unsigned int)> audioCallback_;
