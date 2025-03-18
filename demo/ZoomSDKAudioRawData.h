@@ -1,22 +1,20 @@
-#include "rawdata/rawdata_audio_helper_interface.h"
+// ZoomSDKAudioRawData.h
+#pragma once
 #include "zoom_sdk.h"
-#include "zoom_sdk_raw_data_def.h"
+#include "rawdata/zoom_rawdata_api.h" // For IAudioRawDataDelegate and AudioRawData
 #include <functional>
 
-USING_ZOOM_SDK_NAMESPACE
+using namespace ZOOMSDK;
 
-class ZoomSDKAudioRawData : public IZoomSDKAudioRawDataDelegate {
-    std::function<void(const char*, unsigned int)> audioCallback_;
+class ZoomSDKAudioRawData : public IAudioRawDataDelegate {
+private:
+    FILE* mixedAudioFile;
+
 public:
-    void setAudioCallback(std::function<void(const char*, unsigned int)> callback) {
-        audioCallback_ = callback;
-    }
+    ZoomSDKAudioRawData(const char* filePath);
+    virtual ~ZoomSDKAudioRawData();
 
-    virtual void onMixedAudioRawDataReceived(AudioRawData* data_) {
-        if (audioCallback_ && data_) {
-            audioCallback_(data_->GetBuffer(), data_->GetBufferLen());
-        }
-    }
+    virtual void onMixedAudioRawDataReceived(AudioRawData* data_); // Declaration only
     virtual void onOneWayAudioRawDataReceived(AudioRawData* data_, uint32_t node_id) {}
     virtual void onShareAudioRawDataReceived(AudioRawData* data_) {}
     virtual void onOneWayInterpreterAudioRawDataReceived(AudioRawData* data_, const zchar_t* pLanguageName) {}
