@@ -1,11 +1,10 @@
 #include "MeetingServiceEventListener.h"
 #include <rawdata/zoom_rawdata_api.h>
 #include <iostream>
-#include <functional>
 
-MeetingServiceEventListener::MeetingServiceEventListener(std::function<void()> onMeetingStarts, 
-                                                        std::function<void()> onMeetingEnds, 
-                                                        std::function<void()> onInMeeting)
+MeetingServiceEventListener::MeetingServiceEventListener(std::function<void()> onMeetingStarts,
+                                                         std::function<void()> onMeetingEnds,
+                                                         std::function<void()> onInMeeting)
     : onMeetingStarts_(onMeetingStarts), onMeetingEnds_(onMeetingEnds), onInMeeting_(onInMeeting) {}
 
 void MeetingServiceEventListener::onMeetingStatusChanged(MeetingStatus status, int iResult) {
@@ -22,14 +21,7 @@ void MeetingServiceEventListener::onMeetingStatusChanged(MeetingStatus status, i
     case MEETING_STATUS_CONNECTING:
         if (onMeetingStarts_) onMeetingStarts_();
         break;
-    // Other cases unchanged
     default:
         break;
     }
 }
-
-void MeetingServiceEventListener::onMeetingStatisticsWarningNotification(StatisticsWarningType type) {}
-void MeetingServiceEventListener::onMeetingParameterNotification(const MeetingParameter* meeting_param) {}
-void MeetingServiceEventListener::onSuspendParticipantsActivities() {}
-void MeetingServiceEventListener::onAICompanionActiveChangeNotice(bool bActive) {}
-void MeetingServiceEventListener::onMeetingTopicChanged(const zchar_t* sTopic) {}
