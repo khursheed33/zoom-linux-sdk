@@ -322,8 +322,10 @@ void ReadTEXTSettings(std::vector<MeetingConfig>& configs) {
         config.sendVideoRawData = configMap["SendVideoRawData_" + prefix] == "true";
         config.sendAudioRawData = configMap["SendAudioRawData_" + prefix] == "true";
         configs.push_back(config);
+        std::cout << "Loaded meeting " << meetingIdx << ": " << config.meeting_number << std::endl; // Debug
         meetingIdx++;
     }
+    std::cout << "Total meetings loaded: " << configs.size() << std::endl; // Debug
 }
 
 void my_handler(int s) {
