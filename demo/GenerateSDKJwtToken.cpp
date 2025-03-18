@@ -146,9 +146,9 @@ std::string generateZoomJWT(const std::string& sdk_key, const std::string& sdk_s
 
 int main() {
     // Replace with your Zoom SDK credentials
-    std::string sdk_key = "";    // From Zoom Developer Portal
-    std::string sdk_secret = ""; // From Zoom Developer Portal
-    std::string meeting_number = "";  // e.g., "123456789"
+    std::string sdk_key = "dF7fYaVThecj6jEPQq9Iw";    // From Zoom Developer Portal
+    std::string sdk_secret = "NrPrP1ZyT55BVoDaZz4hHpISGBRLgZxT"; // From Zoom Developer Portal
+    std::string meeting_number = "86143734334";  // e.g., "123456789"
     int role = 0;                                // 0 for participant, 1 for host
     int expiration_seconds = 7200;               // Default to 2 hours (optional)
 
