@@ -131,7 +131,7 @@ private:
             return;
         }
 
-        m_pMeetingService->SetEvent(new MeetingServiceEventListener(
+        m_pMeetingService->SetEvent(new ZOOMSDK::MeetingServiceEventListener(
             [this]() { onMeetingJoined(); },
             [this]() { onMeetingEndsQuitApp(); },
             [this]() { onInMeeting(); }
