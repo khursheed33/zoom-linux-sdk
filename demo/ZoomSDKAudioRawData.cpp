@@ -4,11 +4,15 @@
 using namespace ZOOMSDK;
 
 ZoomSDKAudioRawData::ZoomSDKAudioRawData(const char* filePath) {
-    mixedAudioFile = fopen(filePath, "wb");
+    mixedAudioFile = filePath ? fopen(filePath, "wb") : nullptr;
 }
 
 ZoomSDKAudioRawData::~ZoomSDKAudioRawData() {
     if (mixedAudioFile) fclose(mixedAudioFile);
+}
+
+void ZoomSDKAudioRawData::setAudioCallback(std::function<void(const char*, unsigned int)> cb) {
+    audioCallback_ = cb;
 }
 
 void ZoomSDKAudioRawData::onMixedAudioRawDataReceived(AudioRawData* audioRawData) {
@@ -16,5 +20,8 @@ void ZoomSDKAudioRawData::onMixedAudioRawDataReceived(AudioRawData* audioRawData
     if (mixedAudioFile) {
         fwrite(audioRawData->GetBuffer(), sizeof(char), audioRawData->GetBufferLen(), mixedAudioFile);
         fflush(mixedAudioFile);
+    }
+    if (audioCallback_) {
+        audioCallback_(audioRawData->GetBuffer(), audioRawData->GetBufferLen());
     }
 }

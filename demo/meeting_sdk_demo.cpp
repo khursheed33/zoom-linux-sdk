@@ -57,6 +57,8 @@ public:
         if (!audioFile_.is_open()) {
             std::cerr << "Failed to open audio file for meeting " << config_.meeting_number << std::endl;
         }
+        // Initialize audio_source with a file path for SDK raw data
+        audio_source = new ZoomSDKAudioRawData((config_.meeting_number + "_raw_audio_sdk.pcm").c_str());
         InitMeetingSDK();
     }
 
@@ -81,7 +83,7 @@ private:
     ISettingService* m_pSettingService = nullptr;
     IMeetingRecordingController* m_pRecordController = nullptr;
     IMeetingParticipantsController* m_pParticipantsController = nullptr;
-    ZoomSDKAudioRawData* audio_source = new ZoomSDKAudioRawData();
+    ZoomSDKAudioRawData* audio_source; // Initialized in constructor
     IZoomSDKAudioRawDataHelper* audioHelper = nullptr;
 
     void InitMeetingSDK() {
