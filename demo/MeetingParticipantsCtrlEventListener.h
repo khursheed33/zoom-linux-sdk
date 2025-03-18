@@ -1,22 +1,26 @@
+// MeetingParticipantsCtrlEventListener.h
+#pragma once
 #include "zoom_sdk.h"
-#include <meeting_service_components/meeting_participants_ctrl_interface.h>
+#include "meeting_service_components/meeting_participants_ctrl_interface.h"
+#include "meeting_service_components/meeting_audio_interface.h" // For AudioType
 #include <functional>
 
-USING_ZOOM_SDK_NAMESPACE
+using namespace ZOOMSDK;
 
 class MeetingParticipantsCtrlEventListener : public IMeetingParticipantsCtrlEvent {
+private:
     std::function<void()> onIsHost_;
     std::function<void()> onIsCoHost_;
+
 public:
-    MeetingParticipantsCtrlEventListener(std::function<void()> onIsHost, std::function<void()> onIsCoHost)
-        : onIsHost_(onIsHost), onIsCoHost_(onIsCoHost) {}
+    MeetingParticipantsCtrlEventListener(std::function<void()> onIsHost, std::function<void()> onIsCoHost);
 
     virtual void onUserJoin(IList<unsigned int>* lstUserID, const zchar_t* strUserList = NULL) {}
     virtual void onUserLeft(IList<unsigned int>* lstUserID, const zchar_t* strUserList = NULL) {}
-    virtual void onHostChangeNotification(unsigned int userId) { if (onIsHost_) onIsHost_(); }
+    virtual void onHostChangeNotification(unsigned int userId); // Declaration only
     virtual void onLowOrRaiseHandStatusChanged(bool bLow, unsigned int userid) {}
     virtual void onUserNamesChanged(IList<unsigned int>* lstUserID) {}
-    virtual void onCoHostChangeNotification(unsigned int userId, bool isCoHost) { if (isCoHost && onIsCoHost_) onIsCoHost_(); }
+    virtual void onCoHostChangeNotification(unsigned int userId, bool isCoHost); // Declaration only
     virtual void onInvalidReclaimHostkey() {}
     virtual void onAllHandsLowered() {}
     virtual void onLocalRecordingStatusChanged(unsigned int user_id, RecordingStatus status) {}
