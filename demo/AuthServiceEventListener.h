@@ -1,16 +1,18 @@
-#include "auth_service_interface.h"
+// AuthServiceEventListener.h
+#pragma once
+#include "zoom_sdk.h"
 #include <functional>
 
-USING_ZOOM_SDK_NAMESPACE
+using namespace ZOOMSDK;
 
 class AuthServiceEventListener : public IAuthServiceEvent {
+private:
     std::function<void()> onAuthSuccess_;
-public:
-    AuthServiceEventListener(std::function<void()> onAuthSuccess) : onAuthSuccess_(onAuthSuccess) {}
 
-    virtual void onAuthenticationReturn(AuthResult ret) {
-        if (ret == AUTHRET_SUCCESS && onAuthSuccess_) onAuthSuccess_();
-    }
+public:
+    AuthServiceEventListener(std::function<void()> onAuthSuccess);
+
+    virtual void onAuthenticationReturn(AuthResult ret); // Declaration only
     virtual void onLoginReturnWithReason(LOGINSTATUS ret, IAccountInfo* pAccountInfo, LoginFailReason reason) {}
     virtual void onLogout() {}
     virtual void onZoomIdentityExpired() {}
