@@ -13,7 +13,7 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
-#include <memory> // For std::unique_ptr
+#include <memory>
 #include <chrono>
 
 #include "zoom_sdk.h"
@@ -57,7 +57,6 @@ public:
         if (!audioFile_.is_open()) {
             std::cerr << "Failed to open audio file for meeting " << config_.meeting_number << std::endl;
         }
-        // Initialize audio_source with a file path for SDK raw data
         audio_source = new ZoomSDKAudioRawData((config_.meeting_number + "_raw_audio_sdk.pcm").c_str());
         InitMeetingSDK();
     }
@@ -71,7 +70,7 @@ public:
     void Start() {
         AuthMeetingSDK();
         thread_ = std::thread(&ZoomMeeting::Run, this);
-        thread_.detach(); // Detach to allow independent running
+        thread_.detach();
     }
 
 private:
@@ -83,7 +82,7 @@ private:
     ISettingService* m_pSettingService = nullptr;
     IMeetingRecordingController* m_pRecordController = nullptr;
     IMeetingParticipantsController* m_pParticipantsController = nullptr;
-    ZoomSDKAudioRawData* audio_source; // Initialized in constructor
+    ZoomSDKAudioRawData* audio_source;
     IZoomSDKAudioRawDataHelper* audioHelper = nullptr;
 
     void InitMeetingSDK() {
@@ -238,7 +237,7 @@ private:
         audio_source->setAudioCallback([this](const char* data, unsigned int length) {
             if (audioFile_.is_open()) {
                 audioFile_.write(data, length);
-                audioFile_.flush(); // Ensure data is written immediately
+                audioFile_.flush();
             }
         });
         std::cout << "Started raw audio recording for meeting " << config_.meeting_number << std::endl;

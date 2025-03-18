@@ -7,16 +7,17 @@
 
 using namespace ZOOMSDK;
 
-class ZoomSDKAudioRawData : public IAudioRawDataDelegate {
+// Ensure inheritance from the correct interface
+class ZoomSDKAudioRawData : public IZoomSDKAudioRawDataDelegate { // Changed to IZoomSDKAudioRawDataDelegate
 private:
     FILE* mixedAudioFile;
-    std::function<void(const char*, unsigned int)> audioCallback_; // Add callback support
+    std::function<void(const char*, unsigned int)> audioCallback_;
 
 public:
-    ZoomSDKAudioRawData(const char* filePath = nullptr); // Default parameter
+    ZoomSDKAudioRawData(const char* filePath = nullptr);
     virtual ~ZoomSDKAudioRawData();
 
-    void setAudioCallback(std::function<void(const char*, unsigned int)> cb); // Add setter for callback
+    void setAudioCallback(std::function<void(const char*, unsigned int)> cb);
 
     virtual void onMixedAudioRawDataReceived(AudioRawData* data_);
     virtual void onOneWayAudioRawDataReceived(AudioRawData* data_, uint32_t node_id) {}
