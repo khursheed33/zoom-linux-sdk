@@ -1,22 +1,21 @@
-#include <meeting_service_components/meeting_recording_interface.h>
+// MeetingRecordingCtrlEventListener.h
+#pragma once
 #include "zoom_sdk.h"
+#include "meeting_service_components/meeting_recording_interface.h" // For IMeetingRecordingCtrlEvent
 #include <functional>
 
-USING_ZOOM_SDK_NAMESPACE
+using namespace ZOOMSDK;
 
 class MeetingRecordingCtrlEventListener : public IMeetingRecordingCtrlEvent {
+private:
     std::function<void()> onIsGivenRecordingPermission_;
+
 public:
-    MeetingRecordingCtrlEventListener(std::function<void()> onIsGivenRecordingPermission)
-        : onIsGivenRecordingPermission_(onIsGivenRecordingPermission) {}
+    MeetingRecordingCtrlEventListener(std::function<void()> onIsGivenRecordingPermission);
 
     virtual void onRecordingStatus(RecordingStatus status) {}
     virtual void onCloudRecordingStatus(RecordingStatus status) {}
-    virtual void onRecordPrivilegeChanged(bool bCanRec) {
-        if (bCanRec && onIsGivenRecordingPermission_) {
-            onIsGivenRecordingPermission_();
-        }
-    }
+    virtual void onRecordPrivilegeChanged(bool bCanRec); // Declaration only
     virtual void onLocalRecordingPrivilegeRequestStatus(RequestLocalRecordingStatus status) {}
     virtual void onRequestCloudRecordingResponse(RequestStartCloudRecordingStatus status) {}
     virtual void onLocalRecordingPrivilegeRequested(IRequestLocalRecordingPrivilegeHandler* handler) {}
