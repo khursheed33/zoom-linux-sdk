@@ -82,7 +82,7 @@ private:
     ISettingService* m_pSettingService = nullptr;
     IMeetingRecordingController* m_pRecordController = nullptr;
     IMeetingParticipantsController* m_pParticipantsController = nullptr;
-    ZoomSDKAudioRawData* audio_source;
+    ZoomSDKAudioRawData* audio_source = nullptr;
     IZoomSDKAudioRawDataHelper* audioHelper = nullptr;
 
     void InitMeetingSDK() {

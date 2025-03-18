@@ -19,18 +19,18 @@ void ZoomSDKVideoSource::onInitialize(IZoomSDKVideoSender* sender, IList<VideoSo
     videoSender_ = sender;
     suggest_cap.width = WIDTH;
     suggest_cap.height = HEIGHT;
-    suggest_cap.frameRate = 30; // Example frame rate
+    suggest_cap.frame = 30; // Corrected from frameRate to frame
 }
 
 void ZoomSDKVideoSource::onPropertyChange(IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability suggest_cap) {
-    std::cout << "Video source property changed: " << suggest_cap.width << "x" << suggest_cap.height << " @ " << suggest_cap.frameRate << "fps" << std::endl;
+    std::cout << "Video source property changed: " << suggest_cap.width << "x" << suggest_cap.height << " @ " << suggest_cap.frame << "fps" << std::endl;
     // Update sender settings if needed
 }
 
 void ZoomSDKVideoSource::onStartSend() {
     std::cout << "Started sending video" << std::endl;
     if (videoSender_) {
-        videoSender_->sendVideoFrame(frameBuffer_, WIDTH, HEIGHT, WIDTH * 3, 30);
+        videoSender_->sendVideoFrame(reinterpret_cast<char*>(frameBuffer_), WIDTH, HEIGHT, WIDTH * 3, 0); // Added rotation (0), cast to char*
     }
 }
 
