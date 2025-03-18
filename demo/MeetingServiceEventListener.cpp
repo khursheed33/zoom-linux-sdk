@@ -2,6 +2,8 @@
 #include <rawdata/zoom_rawdata_api.h>
 #include <iostream>
 
+using namespace ZOOMSDK; // Use the namespace locally
+
 MeetingServiceEventListener::MeetingServiceEventListener(std::function<void()> onMeetingStarts,
                                                          std::function<void()> onMeetingEnds,
                                                          std::function<void()> onInMeeting)
