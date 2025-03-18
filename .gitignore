@@ -1,10 +1,5 @@
 demo/bin/
 demo/build/
-demo/lib/zoom_meeting_sdk/*.so
-demo/lib/zoom_meeting_sdk/*.1
-demo/lib/zoom_meeting_sdk/qt_libs/Qt/*
-demo/lib/zoom_meeting_sdk/json/translations.json
-demo/include/h/*
 demo/.vscode/
 demo/out
 demo/*.avi
@@ -21,8 +16,8 @@ demo/CMakeSettings.json
 # Untrack the files (but keep them locally)
 git rm --cached config.json
 
-
-
+/config.txt
+/generate_jwt
 
 /demo/config.txt
 /demo/lib/zoom_meeting_sdk/images
