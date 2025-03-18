@@ -1,8 +1,7 @@
 // ZoomSDKVideoSource.h
 #pragma once
 #include "zoom_sdk.h" // Base SDK definitions
-#include "h/zoom_sdk_raw_data_def.h" // Defines VideoSourceCapability, IList, etc.
-#include "h/rawdata/zoom_rawdata_api.h" // Defines IZoomSDKVideoSource, IZoomSDKVideoSender
+#include "h/rawdata/rawdata_video_source_helper_interface.h" // Defines IZoomSDKVideoSource, IZoomSDKVideoSender, VideoSourceCapability
 #include <cstdint> // For uint8_t
 
 using namespace ZOOMSDK;
@@ -16,8 +15,9 @@ public:
     ZoomSDKVideoSource();
     virtual ~ZoomSDKVideoSource();
 
-    // Core IZoomSDKVideoSource methods
-    virtual void onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& current_cap);
+    // IZoomSDKVideoSource methods (from rawdata_video_source_helper_interface.h)
+    virtual void onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& suggest_cap);
+    virtual void onPropertyChange(IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability suggest_cap);
     virtual void onStartSend();
     virtual void onStopSend();
     virtual void onUninitialized();

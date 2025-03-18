@@ -14,12 +14,17 @@ ZoomSDKVideoSource::~ZoomSDKVideoSource() {
     delete[] frameBuffer_;
 }
 
-void ZoomSDKVideoSource::onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& current_cap) {
+void ZoomSDKVideoSource::onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& suggest_cap) {
     std::cout << "Video source initialized" << std::endl;
     videoSender_ = sender;
-    current_cap.width = WIDTH;
-    current_cap.height = HEIGHT;
-    current_cap.frameRate = 30; // Example frame rate
+    suggest_cap.width = WIDTH;
+    suggest_cap.height = HEIGHT;
+    suggest_cap.frameRate = 30; // Example frame rate
+}
+
+void ZoomSDKVideoSource::onPropertyChange(IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability suggest_cap) {
+    std::cout << "Video source property changed: " << suggest_cap.width << "x" << suggest_cap.height << " @ " << suggest_cap.frameRate << "fps" << std::endl;
+    // Update sender settings if needed
 }
 
 void ZoomSDKVideoSource::onStartSend() {
