@@ -13,6 +13,8 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include <memory> // For std::unique_ptr
+#include <chrono>
 
 #include "zoom_sdk.h"
 #include "auth_service_interface.h"
@@ -37,9 +39,6 @@
 
 USING_ZOOM_SDK_NAMESPACE
 
-GMainLoop* loop;
-
-// Structure to hold meeting configuration
 struct MeetingConfig {
     std::string meeting_number;
     std::string token;
@@ -51,11 +50,13 @@ struct MeetingConfig {
     bool sendAudioRawData = false;
 };
 
-// Class to manage a single Zoom meeting instance
 class ZoomMeeting {
 public:
     ZoomMeeting(const MeetingConfig& config) : config_(config) {
         audioFile_ = std::ofstream(config_.meeting_number + "_raw_audio.pcm", std::ios::binary);
+        if (!audioFile_.is_open()) {
+            std::cerr << "Failed to open audio file for meeting " << config_.meeting_number << std::endl;
+        }
         InitMeetingSDK();
     }
 
@@ -68,17 +69,13 @@ public:
     void Start() {
         AuthMeetingSDK();
         thread_ = std::thread(&ZoomMeeting::Run, this);
-    }
-
-    void Run() {
-        g_main_loop_run(g_main_loop_new(NULL, FALSE));
+        thread_.detach(); // Detach to allow independent running
     }
 
 private:
     MeetingConfig config_;
     std::thread thread_;
-    std::ofstream audioFile_; // File to save raw audio
-
+    std::ofstream audioFile_;
     IAuthService* m_pAuthService = nullptr;
     IMeetingService* m_pMeetingService = nullptr;
     ISettingService* m_pSettingService = nullptr;
@@ -97,18 +94,24 @@ private:
 
         SDKError err = InitSDK(initParam);
         if (err != SDKERR_SUCCESS) {
-            std::cerr << "Init SDK failed for meeting " << config_.meeting_number << std::endl;
+            std::cerr << "Init SDK failed for meeting " << config_.meeting_number << ": " << err << std::endl;
         }
     }
 
     void AuthMeetingSDK() {
         SDKError err = CreateAuthService(&m_pAuthService);
-        if (err != SDKERR_SUCCESS) return;
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "CreateAuthService failed for meeting " << config_.meeting_number << ": " << err << std::endl;
+            return;
+        }
 
         m_pAuthService->SetEvent(new AuthServiceEventListener([this]() { OnAuthenticationComplete(); }));
         AuthContext param;
         param.jwt_token = config_.token.c_str();
-        m_pAuthService->SDKAuth(param);
+        err = m_pAuthService->SDKAuth(param);
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "SDKAuth failed for meeting " << config_.meeting_number << ": " << err << std::endl;
+        }
     }
 
     void OnAuthenticationComplete() {
@@ -116,8 +119,17 @@ private:
     }
 
     void JoinMeeting() {
-        CreateMeetingService(&m_pMeetingService);
-        CreateSettingService(&m_pSettingService);
+        SDKError err = CreateMeetingService(&m_pMeetingService);
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "CreateMeetingService failed for meeting " << config_.meeting_number << ": " << err << std::endl;
+            return;
+        }
+
+        err = CreateSettingService(&m_pSettingService);
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "CreateSettingService failed for meeting " << config_.meeting_number << ": " << err << std::endl;
+            return;
+        }
 
         m_pMeetingService->SetEvent(new MeetingServiceEventListener(
             [this]() { onMeetingJoined(); },
@@ -146,14 +158,23 @@ private:
         withoutloginParam.isVideoOff = !config_.sendVideoRawData;
         withoutloginParam.isAudioOff = !config_.sendAudioRawData;
 
-        SDKError err = m_pMeetingService->Join(joinParam);
+        err = m_pMeetingService->Join(joinParam);
         if (err != SDKERR_SUCCESS) {
-            std::cerr << "Failed to join meeting " << config_.meeting_number << std::endl;
+            std::cerr << "Failed to join meeting " << config_.meeting_number << ": " << err << std::endl;
+        } else {
+            std::cout << "Successfully joined meeting " << config_.meeting_number << std::endl;
         }
+    }
+
+    void Run() {
+        GMainLoop* loop = g_main_loop_new(NULL, FALSE);
+        g_main_loop_run(loop);
+        g_main_loop_unref(loop);
     }
 
     void onInMeeting() {
         if (m_pMeetingService->GetMeetingStatus() == MEETING_STATUS_INMEETING) {
+            std::cout << "In meeting " << config_.meeting_number << std::endl;
             CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData);
         }
     }
@@ -162,72 +183,110 @@ private:
         std::cout << "Joining Meeting " << config_.meeting_number << "...\n";
     }
 
-    void onMeetingEndsQuitApp() {}
+    void onMeetingEndsQuitApp() {
+        std::cout << "Meeting " << config_.meeting_number << " ended\n";
+    }
 
-    void onIsHost() { CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData); }
-    void onIsCoHost() { CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData); }
-    void onIsGivenRecordingPermission() { CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData); }
+    void onIsHost() {
+        std::cout << "Became host for meeting " << config_.meeting_number << std::endl;
+        CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData);
+    }
 
-    /*void CheckAndStartRawRecording(bool isVideo, bool isAudio) {
-        if (!(isVideo || isAudio)) return;
+    void onIsCoHost() {
+        std::cout << "Became co-host for meeting " << config_.meeting_number << std::endl;
+        CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData);
+    }
+
+    void onIsGivenRecordingPermission() {
+        std::cout << "Given recording permission for meeting " << config_.meeting_number << std::endl;
+        CheckAndStartRawRecording(config_.getVideoRawData, config_.getAudioRawData);
+    }
+
+    void CheckAndStartRawRecording(bool isVideo, bool isAudio) {
+        if (!isAudio) return;
 
         m_pRecordController = m_pMeetingService->GetMeetingRecordingController();
-        if (m_pRecordController->CanStartRawRecording() == SDKERR_SUCCESS) {
-            m_pRecordController->StartRawRecording();
-            if (isAudio) {
-                audioHelper = GetAudioRawdataHelper();
-                audioHelper->subscribe(audio_source);
-                audio_source->setAudioCallback([this](const char* data, unsigned int length) {
-                    if (audioFile_.is_open()) {
-                        audioFile_.write(data, length);
-                    }
-                });
+        SDKError err = m_pRecordController->CanStartRawRecording();
+        if (err != SDKERR_SUCCESS) {
+            std::cout << "Cannot start raw recording for meeting " << config_.meeting_number 
+                      << ": No permission (err: " << err << ")\n";
+            return;
+        }
+
+        err = m_pRecordController->StartRawRecording();
+        if (err != SDKERR_SUCCESS) {
+            std::cout << "Failed to start raw recording for meeting " << config_.meeting_number 
+                      << ": " << err << std::endl;
+            return;
+        }
+
+        audioHelper = GetAudioRawdataHelper();
+        if (!audioHelper) {
+            std::cerr << "Failed to get audio helper for meeting " << config_.meeting_number << std::endl;
+            return;
+        }
+
+        err = audioHelper->subscribe(audio_source);
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "Failed to subscribe to audio for meeting " << config_.meeting_number 
+                      << ": " << err << std::endl;
+            return;
+        }
+
+        audio_source->setAudioCallback([this](const char* data, unsigned int length) {
+            if (audioFile_.is_open()) {
+                audioFile_.write(data, length);
+                audioFile_.flush(); // Ensure data is written immediately
             }
-        }
-    }*/
-	void CheckAndStartRawRecording(bool isVideo, bool isAudio) {
-        if (isAudio) {
-            audioHelper = GetAudioRawdataHelper();
-            audioHelper->subscribe(audio_source);
-            audio_source->setAudioCallback([this](const char* data, unsigned int length) {
-                if (audioFile_.is_open()) {
-                    audioFile_.write(data, length);
-                }
-            });
-        }
+        });
+        std::cout << "Started raw audio recording for meeting " << config_.meeting_number << std::endl;
     }
 
     void LeaveMeeting() {
         if (m_pMeetingService && m_pMeetingService->GetMeetingStatus() != MEETING_STATUS_IDLE) {
-            m_pMeetingService->Leave(LEAVE_MEETING);
+            SDKError err = m_pMeetingService->Leave(LEAVE_MEETING);
+            if (err == SDKERR_SUCCESS) {
+                std::cout << "Successfully left meeting " << config_.meeting_number << std::endl;
+            }
         }
     }
 
     void CleanSDK() {
+        if (audioHelper && audio_source) {
+            audioHelper->unSubscribe();
+            delete audio_source;
+            audio_source = nullptr;
+        }
         if (m_pAuthService) DestroyAuthService(m_pAuthService);
         if (m_pMeetingService) DestroyMeetingService(m_pMeetingService);
         if (m_pSettingService) DestroySettingService(m_pSettingService);
-        if (audioHelper) audioHelper->unSubscribe();
-		
-		if (videoSourceHelper_) {
-            videoSourceHelper_->setExternalVideoSource(nullptr);
-            delete video_source_;
-            video_source_ = nullptr;
+        SDKError err = CleanUPSDK();
+        if (err != SDKERR_SUCCESS) {
+            std::cerr << "CleanUPSDK failed for meeting " << config_.meeting_number << ": " << err << std::endl;
         }
-		
-        CleanUPSDK();
     }
 };
 
-// Global vector to hold meeting instances
 std::vector<std::unique_ptr<ZoomMeeting>> meetings;
 std::mutex meetings_mutex;
+
+std::string getSelfDirPath() {
+    char dest[PATH_MAX];
+    memset(dest, 0, sizeof(dest));
+    if (readlink("/proc/self/exe", dest, PATH_MAX) == -1) {
+        std::cerr << "Failed to get executable path" << std::endl;
+        return "";
+    }
+    char* tmp = strrchr(dest, '/');
+    if (tmp) *tmp = 0;
+    return std::string(dest);
+}
 
 void ReadTEXTSettings(std::vector<MeetingConfig>& configs) {
     std::string self_dir = getSelfDirPath() + "/config.txt";
     std::ifstream configFile(self_dir);
     if (!configFile) {
-        std::cerr << "Error opening config file." << std::endl;
+        std::cerr << "Error opening config file at " << self_dir << std::endl;
         return;
     }
 
@@ -267,8 +326,9 @@ void ReadTEXTSettings(std::vector<MeetingConfig>& configs) {
 }
 
 void my_handler(int s) {
+    std::cout << "Caught signal " << s << ", cleaning up...\n";
     std::lock_guard<std::mutex> lock(meetings_mutex);
-    meetings.clear(); // This will call destructors for each ZoomMeeting instance
+    meetings.clear();
     std::exit(0);
 }
 
@@ -290,7 +350,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Keep main thread alive
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
