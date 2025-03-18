@@ -1,8 +1,9 @@
 // ZoomSDKAudioRawData.h
 #pragma once
 #include "zoom_sdk.h"
-#include "h/rawdata/zoom_rawdata_api.h" // Should define AudioRawData fully
+#include "h/rawdata/zoom_rawdata_api.h" // Base raw data API
 #include "h/rawdata/rawdata_audio_helper_interface.h" // Defines IZoomSDKAudioRawDataDelegate
+#include "h/rawdata/rawdata_renderer_interface.h" // Likely defines AudioRawData fully
 #include <functional>
 #include <cstdio> // For FILE
 
