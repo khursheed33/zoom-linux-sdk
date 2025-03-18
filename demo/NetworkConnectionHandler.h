@@ -1,6 +1,7 @@
 // NetworkConnectionHandler.h
 #pragma once
-#include "network_connection_handler_interface.h" // Explicitly include the interface header
+#include "zoom_sdk.h" // Include this first to define ZOOMSDK namespace and types
+#include "network_connection_handler_interface.h"
 #include <functional>
 
 using namespace ZOOMSDK;
