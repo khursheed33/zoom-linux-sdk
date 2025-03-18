@@ -1,21 +1,20 @@
-#include <iostream>
 #include "NetworkConnectionHandler.h"
-#include <functional>
+#include <iostream>
 
-using namespace std;
+using namespace ZOOMSDK;
 
 NetworkConnectionHandler::NetworkConnectionHandler(std::function<void()> postToDo)
     : postToDo_(postToDo) {}
 
 void NetworkConnectionHandler::onProxyDetectComplete() {
-    std::cout << "onProxyDetectComplete" << endl;
+    std::cout << "onProxyDetectComplete" << std::endl;
     if (postToDo_) postToDo_();
 }
 
 void NetworkConnectionHandler::onProxySettingNotification(IProxySettingHandler* handler) {
-    std::cout << "onProxySettingNotification" << endl;
+    std::cout << "onProxySettingNotification" << std::endl;
 }
 
 void NetworkConnectionHandler::onSSLCertVerifyNotification(ISSLCertVerificationHandler* handler) {
-    std::cout << "onSSLCertVerifyNotification" << endl;
+    std::cout << "onSSLCertVerifyNotification" << std::endl;
 }

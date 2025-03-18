@@ -1,11 +1,13 @@
 // NetworkConnectionHandler.h
-#include <network_connection_handler_interface.h> // Zoom SDK header
+#pragma once
+#include "zoom_sdk.h" // Include foundational Zoom SDK header
 #include <functional>
 
 using namespace ZOOMSDK;
 
 class NetworkConnectionHandler : public INetworkConnectionHandler {
     std::function<void()> postToDo_;
+
 public:
     NetworkConnectionHandler(std::function<void()> postToDo);
 
