@@ -1,6 +1,7 @@
 // AuthServiceEventListener.h
 #pragma once
-#include "zoom_sdk.h"
+#include "zoom_sdk.h" // Foundational SDK header
+#include "auth_service_interface.h" // Defines IAuthServiceEvent and related types
 #include <functional>
 
 using namespace ZOOMSDK;
