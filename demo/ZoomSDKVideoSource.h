@@ -1,6 +1,7 @@
 // ZoomSDKVideoSource.h
 #pragma once
 #include "zoom_sdk.h"
+#include "h/zoom_sdk_raw_data_def.h" // Defines VideoSourceDeviceStatus and related types
 #include "h/rawdata/zoom_rawdata_api.h" // For IZoomSDKVideoSource
 #include <cstdint> // For uint8_t
 
