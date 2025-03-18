@@ -345,14 +345,16 @@ int main(int argc, char* argv[]) {
     sigIntHandler.sa_flags = 0;
     sigaction(SIGINT, &sigIntHandler, NULL);
 
+    std::cout << "Starting " << configs.size() << " meetings..." << std::endl; // Debug
     {
         std::lock_guard<std::mutex> lock(meetings_mutex);
         for (const auto& config : configs) {
             meetings.push_back(std::make_unique<ZoomMeeting>(config));
             meetings.back()->Start();
+            std::cout << "Started meeting: " << config.meeting_number << std::endl; // Debug
         }
     }
-
+    std::cout << "Entering main loop..." << std::endl; // Debug
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
