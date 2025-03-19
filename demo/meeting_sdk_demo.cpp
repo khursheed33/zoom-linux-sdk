@@ -14,7 +14,7 @@
 #include "meeting_service_components/meeting_audio_interface.h"
 #include "meeting_service_components/meeting_participants_ctrl_interface.h"
 #include "meeting_service_components/meeting_recording_interface.h"
-#include "rawdata/zoom_rawdata_api.h" // Added for GetAudioRawdataHelper
+#include "rawdata/zoom_rawdata_api.h"
 
 #include "AuthServiceEventListener.h"
 #include "MeetingParticipantsCtrlEventListener.h"
@@ -41,7 +41,6 @@ std::mutex meetings_mutex;
 std::vector<std::unique_ptr<class ZoomMeeting>> meetings;
 std::atomic<bool> exiting(false);
 
-// Signal handler function moved outside class
 void my_handler(int s) {
     std::cout << "Caught signal " << s << ", cleaning up...\n";
     std::lock_guard<std::mutex> lock(meetings_mutex);
@@ -89,13 +88,15 @@ public:
     }
 
     void AuthMeetingSDK() {
-        SDKError err = InitSDK();
+        InitParam initParam;
+        initParam.strWebDomain = "https://zoom.us"; // Default domain
+        SDKError err = ZOOMSDK::InitSDK(initParam); // Added InitParam
         if (err != SDKERR_SUCCESS) {
             std::cerr << "Failed to initialize SDK for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
             return;
         }
 
-        m_pAuthService = GetAuthService();
+        m_pAuthService = ZOOMSDK::GetAuthService(); // Fully qualified
         if (!m_pAuthService) {
             std::cerr << "Failed to get auth service for meeting " << config_.meeting_number << std::endl;
             return;
@@ -123,7 +124,7 @@ public:
     void JoinMeeting() {
         std::cout << "Attempting to join meeting: " << config_.meeting_number << std::endl;
 
-        m_pMeetingService = GetMeetingService();
+        m_pMeetingService = ZOOMSDK::GetMeetingService(); // Fully qualified
         if (!m_pMeetingService) {
             std::cerr << "Failed to get meeting service for meeting " << config_.meeting_number << std::endl;
             return;
@@ -185,7 +186,7 @@ public:
             err = m_pRecordingController->StartRawRecording();
             if (err == SDKERR_SUCCESS) {
                 std::cout << "Raw recording started for meeting: " << config_.meeting_number << std::endl;
-                audioHelper = ZOOMSDK::GetAudioRawdataHelper(); // Corrected with namespace
+                audioHelper = ZOOMSDK::GetAudioRawdataHelper();
                 if (!audioHelper) {
                     std::cerr << "Failed to get audio helper for meeting " << config_.meeting_number << std::endl;
                     return;
@@ -207,7 +208,7 @@ public:
 
     void CleanSDK() {
         if (audioHelper && audio_source) {
-            audioHelper->unSubscribe(audio_source);
+            audioHelper->unSubscribe(); // No argument
             audioHelper = nullptr;
         }
 
@@ -234,7 +235,7 @@ public:
             g_main_loop_quit(loop_);
         }
 
-        SDKError err = CleanupSDK();
+        SDKError err = ZOOMSDK::CleanupSDK(); // Fully qualified
         if (err != SDKERR_SUCCESS) {
             std::cerr << "Failed to clean up SDK for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
         } else {
