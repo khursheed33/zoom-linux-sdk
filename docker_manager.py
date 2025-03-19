@@ -1,3 +1,4 @@
+import os
 import docker
 from docker.errors import DockerException,ImageNotFound
 
@@ -29,8 +30,8 @@ class DockerManager:
                 environment={
                     "MEETING_ID": meeting_id,
                     "MEETING_PASSWORD": meeting_password,
-                    "ZOOM_SDK_KEY": "",
-                    "ZOOM_SDK_SECRET": ""
+                    "ZOOM_SDK_KEY": os.getenv("ZOOM_SDK_KEY"),
+                    "ZOOM_SDK_SECRET": os.getenv("ZOOM_SDK_SECRET"),
                 }
             )
             return container.id
