@@ -1,9 +1,9 @@
 // ZoomSDKAudioRawData.h
 #pragma once
 #include "zoom_sdk.h"
-#include "h/zoom_sdk_raw_data_def.h" // Fully defines AudioRawData
-#include "h/rawdata/zoom_rawdata_api.h" // Base raw data API
-#include "h/rawdata/rawdata_audio_helper_interface.h" // Defines IZoomSDKAudioRawDataDelegate
+#include "zoom_sdk_raw_data_def.h"              // Fixed: Removed "h/" prefix
+#include "rawdata/zoom_rawdata_api.h"           // Fixed: Removed "h/" prefix
+#include "rawdata/rawdata_audio_helper_interface.h" // Fixed: Removed "h/" prefix
 #include <functional>
 #include <cstdio> // For FILE
 
