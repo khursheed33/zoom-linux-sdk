@@ -1,21 +1,39 @@
 // AuthServiceEventListener.h
 #pragma once
-#include "zoom_sdk.h" // Foundational SDK header
-#include "auth_service_interface.h" // Defines IAuthServiceEvent and related types
+#include "auth_service_interface.h"
 #include <functional>
+#include <iostream>
 
-using namespace ZOOMSDK;
-
-class AuthServiceEventListener : public IAuthServiceEvent {
+class AuthServiceEventListener : public ZOOMSDK::IAuthServiceEvent {
 private:
-    std::function<void()> onAuthSuccess_;
+    std::function<void()> onAuthComplete_;
 
 public:
-    AuthServiceEventListener(std::function<void()> onAuthSuccess);
+    AuthServiceEventListener(std::function<void()> cb) : onAuthComplete_(cb) {}
 
-    virtual void onAuthenticationReturn(AuthResult ret); // Declaration only
-    virtual void onLoginReturnWithReason(LOGINSTATUS ret, IAccountInfo* pAccountInfo, LoginFailReason reason) {}
-    virtual void onLogout() {}
-    virtual void onZoomIdentityExpired() {}
-    virtual void onZoomAuthIdentityExpired() {}
+    virtual void onAuthenticationReturn(AuthResult ret) {
+        std::cout << "Auth result received: " << ret << std::endl;
+        if (ret == AUTHRET_SUCCESS && onAuthComplete_) {
+            std::cout << "Authentication successful, calling callback" << std::endl;
+            onAuthComplete_();
+        } else {
+            std::cerr << "Authentication failed with result: " << ret << std::endl;
+        }
+    }
+
+    virtual void onLoginReturnWithReason(ZOOMSDK::LOGINSTATUS status, ZOOMSDK::ILoginFailureReason* reason) {
+        std::cout << "Login status: " << status << std::endl;
+    }
+
+    virtual void onLogout() {
+        std::cout << "Logout event received" << std::endl;
+    }
+
+    virtual void onZoomIdentityExpired() {
+        std::cout << "Zoom identity expired" << std::endl;
+    }
+
+    virtual void onZoomAuthIdentityExpired() {
+        std::cout << "Zoom auth identity expired" << std::endl;
+    }
 };

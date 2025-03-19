@@ -433,7 +433,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Entering main loop..." << std::endl;
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Main loop tick..." << std::endl; // Periodic check
+        std::cout << "Main loop tick..." << std::endl;
     }
 
     std::cout << "Exiting main (should not reach here without signal)" << std::endl;
