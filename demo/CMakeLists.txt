@@ -27,7 +27,6 @@ add_executable(meetingSDKDemo
     MeetingReminderEventListener.cpp
     MeetingServiceEventListener.cpp
     NetworkConnectionHandler.cpp
-    MeetingParticipantsCtrlEventListener.cpp
     MeetingRecordingCtrlEventListener.cpp
     ZoomSDKRenderer.cpp
     ZoomSDKAudioRawData.cpp
