@@ -34,7 +34,7 @@ test-results/
 
 # Environment files
 .env
-.env.*
+config.json
 
 # mypy
 .mypy_cache/

@@ -29,8 +29,8 @@ class DockerManager:
                 environment={
                     "MEETING_ID": meeting_id,
                     "MEETING_PASSWORD": meeting_password,
-                    "ZOOM_SDK_KEY": "drlxHE5GRHSleJPIkLooOQ",
-                    "ZOOM_SDK_SECRET": "h5xAhOqBy90qXUhJ4jI41oj46zrjtE54"
+                    "ZOOM_SDK_KEY": "",
+                    "ZOOM_SDK_SECRET": ""
                 }
             )
             return container.id

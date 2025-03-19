@@ -1,0 +1,8 @@
+meeting_number: "6638319659"
+token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBLZXkiOiJkcmx4SEU1R1JIU2xlSlBJa0xvb09RIiwiZXhwIjoxNzQyMzc3NzA2LCJpYXQiOjE3NDIzNzA1MDYsIm1uIjoiNjYzODMxOTY1OSIsInJvbGUiOjAsInNka0tleSI6ImRybHhIRTVHUkhTbGVKUElrTG9vT1EiLCJ0b2tlbkV4cCI6MTc0MjM3NzcwNn0.kwENPHMILCZvuSRYD0jGUeLziRCpmYrJzhFCP8nO4Rc"
+meeting_password: "khursheed3"
+recording_token: ""
+GetVideoRawData: "false"
+GetAudioRawData: "true"
+SendVideoRawData: "false"
+SendAudioRawData: "false"

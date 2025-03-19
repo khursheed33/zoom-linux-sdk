@@ -4,11 +4,9 @@ demo/.vscode/
 demo/out
 demo/*.avi
 demo/*.mkv
-demo/config.txt
 
 #remove Visual Studio Related Files
 /.vs/
-demo/CMakeSettings.json
 
 #remove mac associated files
 *.DS_store
@@ -17,7 +15,3 @@ demo/CMakeSettings.json
 git rm --cached config.json
 
 /config.txt
-/generate_jwt
-
-/demo/config.txt
-/demo/lib/zoom_meeting_sdk/images
