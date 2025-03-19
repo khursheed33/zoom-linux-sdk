@@ -1,12 +1,12 @@
 #include "ZoomSDKVideoSource.h"
 #include <iostream>
-#include <cstring> // For memset
+#include <cstring>
 
 using namespace ZOOMSDK;
 
 ZoomSDKVideoSource::ZoomSDKVideoSource() {
-    frameBuffer_ = new uint8_t[WIDTH * HEIGHT * 3]; // RGB buffer
-    memset(frameBuffer_, 0, WIDTH * HEIGHT * 3); // Initialize to black
+    frameBuffer_ = new uint8_t[VIDEO_WIDTH * VIDEO_HEIGHT * 3];
+    memset(frameBuffer_, 0, VIDEO_WIDTH * VIDEO_HEIGHT * 3);
     videoSender_ = nullptr;
 }
 
@@ -17,20 +17,19 @@ ZoomSDKVideoSource::~ZoomSDKVideoSource() {
 void ZoomSDKVideoSource::onInitialize(IZoomSDKVideoSender* sender, IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability& suggest_cap) {
     std::cout << "Video source initialized" << std::endl;
     videoSender_ = sender;
-    suggest_cap.width = WIDTH;
-    suggest_cap.height = HEIGHT;
-    suggest_cap.frame = 30; // Corrected from frameRate to frame
+    suggest_cap.width = VIDEO_WIDTH;
+    suggest_cap.height = VIDEO_HEIGHT;
+    suggest_cap.frame = 30;
 }
 
 void ZoomSDKVideoSource::onPropertyChange(IList<VideoSourceCapability>* support_cap_list, VideoSourceCapability suggest_cap) {
     std::cout << "Video source property changed: " << suggest_cap.width << "x" << suggest_cap.height << " @ " << suggest_cap.frame << "fps" << std::endl;
-    // Update sender settings if needed
 }
 
 void ZoomSDKVideoSource::onStartSend() {
     std::cout << "Started sending video" << std::endl;
     if (videoSender_) {
-        videoSender_->sendVideoFrame(reinterpret_cast<char*>(frameBuffer_), WIDTH, HEIGHT, WIDTH * 3, 0); // Added rotation (0), cast to char*
+        videoSender_->sendVideoFrame(reinterpret_cast<char*>(frameBuffer_), VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH * 3, 0);
     }
 }
 

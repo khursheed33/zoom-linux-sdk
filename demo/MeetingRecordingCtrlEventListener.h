@@ -1,27 +1,28 @@
 // MeetingRecordingCtrlEventListener.h
 #pragma once
-#include "zoom_sdk.h"
-#include "meeting_service_components/meeting_recording_interface.h" // For IMeetingRecordingCtrlEvent
+#include "meeting_service_components/meeting_recording_interface.h"
 #include <functional>
+#include <iostream>
 
 using namespace ZOOMSDK;
 
-class MeetingRecordingCtrlEventListener : public IMeetingRecordingCtrlEvent {
+class MeetingRecordingCtrlEventListener : public ZOOMSDK::IMeetingRecordingCtrlEvent {
 private:
-    std::function<void()> onIsGivenRecordingPermission_;
+    std::function<void()> onPermission_;
 
 public:
-    MeetingRecordingCtrlEventListener(std::function<void()> onIsGivenRecordingPermission);
+    MeetingRecordingCtrlEventListener(std::function<void()> cb) : onPermission_(cb) {}
 
-    virtual void onRecordingStatus(RecordingStatus status) {}
-    virtual void onCloudRecordingStatus(RecordingStatus status) {}
-    virtual void onRecordPrivilegeChanged(bool bCanRec); // Declaration only
-    virtual void onLocalRecordingPrivilegeRequestStatus(RequestLocalRecordingStatus status) {}
-    virtual void onRequestCloudRecordingResponse(RequestStartCloudRecordingStatus status) {}
-    virtual void onLocalRecordingPrivilegeRequested(IRequestLocalRecordingPrivilegeHandler* handler) {}
-    virtual void onStartCloudRecordingRequested(IRequestStartCloudRecordingHandler* handler) {}
-    virtual void onCloudRecordingStorageFull(time_t gracePeriodDate) {}
-    virtual void onEnableAndStartSmartRecordingRequested(IRequestEnableAndStartSmartRecordingHandler* handler) {}
-    virtual void onSmartRecordingEnableActionCallback(ISmartRecordingEnableActionHandler* handler) {}
-    virtual void onTranscodingStatusChanged(TranscodingStatus status, const zchar_t* path) {}
+    virtual void onRecordingPermissionRequest(bool bGranted) {
+        std::cout << "Recording permission request: " << bGranted << std::endl;
+        if (bGranted && onPermission_) onPermission_();
+    }
+
+    virtual void onRecordingStatus(ZOOMSDK::RecordingStatus status) {
+        std::cout << "Recording status: " << static_cast<int>(status) << std::endl;
+    }
+
+    virtual void onCloudRecordingStatus(ZOOMSDK::RecordingStatus status) {
+        std::cout << "Cloud recording status: " << static_cast<int>(status) << std::endl;
+    }
 };
