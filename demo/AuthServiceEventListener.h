@@ -21,8 +21,8 @@ public:
         }
     }
 
-    virtual void onLoginReturnWithReason(ZOOMSDK::LOGINSTATUS status, ZOOMSDK::ILoginFailureReason* reason) {
-        std::cout << "Login status: " << status << std::endl;
+    virtual void onLoginReturnWithReason(ZOOMSDK::LOGINSTATUS ret, ZOOMSDK::IAccountInfo* pAccountInfo, ZOOMSDK::LoginFailReason reason) {
+        std::cout << "Login status: " << ret << ", Reason: " << reason << std::endl;
     }
 
     virtual void onLogout() {
