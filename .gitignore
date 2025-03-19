@@ -1,23 +1,85 @@
-demo/bin/
-demo/build/
-demo/.vscode/
-demo/out
-demo/*.avi
-demo/*.mkv
-demo/config.txt
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-#remove Visual Studio Related Files
-/.vs/
-demo/CMakeSettings.json
+# C extensions
+*.so
 
-#remove mac associated files
-*.DS_store
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
 
-# Untrack the files (but keep them locally)
-git rm --cached config.json
+# PyInstaller
+*.spec
 
-/config.txt
-/generate_jwt
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
 
-/demo/config.txt
-/demo/lib/zoom_meeting_sdk/images
+# Python log files
+*.log
+
+# Test and coverage reports
+htmlcov/
+.coverage
+*.cover
+*.py,cover
+nosetests.xml
+coverage.xml
+*.mo
+*.pot
+test-results/
+
+# Environment files
+.env
+.env.*
+
+# mypy
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# VSCode settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# Linting tools
+pylint.log
+flake8.log
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Database files
+*.sqlite3
+
+# Cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker files
+*.pid
+*.tar
+
+# Ignore secrets and sensitive files
+secrets.json
+config.json
+
+# Git merge files
+*.orig
+
+# Ignore any backup files
+*.bak
+*.swp
+*.swo
+
+# Ignore wheel files
+*.whl
