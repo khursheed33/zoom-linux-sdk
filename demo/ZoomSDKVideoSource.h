@@ -1,7 +1,7 @@
 // ZoomSDKVideoSource.h
 #pragma once
 #include "zoom_sdk.h"
-#include "h/rawdata/rawdata_video_source_helper_interface.h" // Defines IZoomSDKVideoSource, IZoomSDKVideoSender, VideoSourceCapability
+#include "rawdata/rawdata_video_source_helper_interface.h" // Fixed: Removed "h/" prefix
 #include <cstdint> // For uint8_t
 
 using namespace ZOOMSDK;
