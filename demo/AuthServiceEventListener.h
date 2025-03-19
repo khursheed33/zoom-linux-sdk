@@ -11,18 +11,18 @@ private:
 public:
     AuthServiceEventListener(std::function<void()> cb) : onAuthComplete_(cb) {}
 
-    virtual void onAuthenticationReturn(AuthResult ret) {
-        std::cout << "Auth result received: " << ret << std::endl;
-        if (ret == AUTHRET_SUCCESS && onAuthComplete_) {
+    virtual void onAuthenticationReturn(ZOOMSDK::AuthResult ret) {
+        std::cout << "Auth result received: " << static_cast<int>(ret) << std::endl;
+        if (ret == ZOOMSDK::AUTHRET_SUCCESS && onAuthComplete_) {
             std::cout << "Authentication successful, calling callback" << std::endl;
             onAuthComplete_();
         } else {
-            std::cerr << "Authentication failed with result: " << ret << std::endl;
+            std::cerr << "Authentication failed with result: " << static_cast<int>(ret) << std::endl;
         }
     }
 
     virtual void onLoginReturnWithReason(ZOOMSDK::LOGINSTATUS ret, ZOOMSDK::IAccountInfo* pAccountInfo, ZOOMSDK::LoginFailReason reason) {
-        std::cout << "Login status: " << ret << ", Reason: " << reason << std::endl;
+        std::cout << "Login status: " << static_cast<int>(ret) << ", Reason: " << static_cast<int>(reason) << std::endl;
     }
 
     virtual void onLogout() {
