@@ -90,15 +90,15 @@ public:
     void AuthMeetingSDK() {
         InitParam initParam;
         initParam.strWebDomain = "https://zoom.us"; // Default domain
-        SDKError err = ZOOMSDK::InitSDK(initParam); // Added InitParam
+        SDKError err = ZOOMSDK::InitSDK(initParam);
         if (err != SDKERR_SUCCESS) {
             std::cerr << "Failed to initialize SDK for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
             return;
         }
 
-        m_pAuthService = ZOOMSDK::GetAuthService(); // Fully qualified
-        if (!m_pAuthService) {
-            std::cerr << "Failed to get auth service for meeting " << config_.meeting_number << std::endl;
+        err = ZOOMSDK::CreateAuthService(&m_pAuthService); // Create auth service
+        if (err != SDKERR_SUCCESS || !m_pAuthService) {
+            std::cerr << "Failed to create auth service for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
             return;
         }
 
@@ -124,9 +124,9 @@ public:
     void JoinMeeting() {
         std::cout << "Attempting to join meeting: " << config_.meeting_number << std::endl;
 
-        m_pMeetingService = ZOOMSDK::GetMeetingService(); // Fully qualified
-        if (!m_pMeetingService) {
-            std::cerr << "Failed to get meeting service for meeting " << config_.meeting_number << std::endl;
+        SDKError err = ZOOMSDK::CreateMeetingService(&m_pMeetingService); // Create meeting service
+        if (err != SDKERR_SUCCESS || !m_pMeetingService) {
+            std::cerr << "Failed to create meeting service for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
             return;
         }
 
@@ -136,7 +136,7 @@ public:
         withoutLoginParam.meetingNumber = std::stoull(config_.meeting_number);
         withoutLoginParam.psw = config_.password.c_str();
 
-        SDKError err = m_pMeetingService->Join(joinParam);
+        err = m_pMeetingService->Join(joinParam);
         if (err != SDKERR_SUCCESS) {
             std::cerr << "Failed to join meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
             return;
@@ -208,7 +208,7 @@ public:
 
     void CleanSDK() {
         if (audioHelper && audio_source) {
-            audioHelper->unSubscribe(); // No argument
+            audioHelper->unSubscribe();
             audioHelper = nullptr;
         }
 
@@ -223,11 +223,13 @@ public:
         }
 
         if (m_pMeetingService) {
+            ZOOMSDK::DestroyMeetingService(m_pMeetingService); // Clean up meeting service
             m_pMeetingService = nullptr;
         }
 
         if (m_pAuthService) {
             m_pAuthService->SetEvent(nullptr);
+            ZOOMSDK::DestroyAuthService(m_pAuthService); // Clean up auth service
             m_pAuthService = nullptr;
         }
 
@@ -235,7 +237,7 @@ public:
             g_main_loop_quit(loop_);
         }
 
-        SDKError err = ZOOMSDK::CleanupSDK(); // Fully qualified
+        SDKError err = ZOOMSDK::CleanUPSDK(); // Correct function name
         if (err != SDKERR_SUCCESS) {
             std::cerr << "Failed to clean up SDK for meeting " << config_.meeting_number << ": " << static_cast<int>(err) << std::endl;
         } else {
