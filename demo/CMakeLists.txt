@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(MeetingSDKDemo)
 
-set(CMAKE_CXX_STANDARD 14)  # Updated from 11 to 14
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
@@ -27,7 +27,7 @@ add_executable(meetingSDKDemo
     MeetingReminderEventListener.cpp
     MeetingServiceEventListener.cpp
     NetworkConnectionHandler.cpp
-    MeetingRecordingCtrlEventListener.cpp
+    # Removed: MeetingRecordingCtrlEventListener.cpp
     ZoomSDKRenderer.cpp
     ZoomSDKAudioRawData.cpp
     ZoomSDKVideoSource.cpp
