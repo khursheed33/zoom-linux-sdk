@@ -1,11 +1,16 @@
 # Use the official Ubuntu image as the base image
 FROM ubuntu:22.04
 
-# Install necessary dependencies
-RUN apt-get update && \
-    apt-get install -y build-essential cmake pkgconf
+# Set environment to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    pkg-config \
+    wget \
+    unzip \
     libx11-xcb1 \
     libxcb-xfixes0 \
     libxcb-shape0 \
@@ -23,22 +28,36 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     libgssapi-krb5-2 \
     openssl \
     ca-certificates \
-    pkg-config \
     libegl-mesa0 \
     libsdl2-dev \
     g++-multilib \
     libcurl4-openssl-dev \
-    libasound2 libasound2-plugins alsa alsa-utils alsa-oss \
-    pulseaudio pulseaudio-utils
+    libasound2 \
+    libasound2-plugins \
+    alsa-utils \
+    alsa-oss \
+    pulseaudio \
+    pulseaudio-utils \
+    libsamplerate0-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Microsoft Speech SDK
+RUN wget -O speechsdk.zip "https://aka.ms/csspeech/linuxbinary" && \
+    unzip speechsdk.zip -d /opt/speechsdk && \
+    rm speechsdk.zip
 
 # Set the working directory
 WORKDIR /app
 
-# Copy your application files to the container
+# Copy the entire demo folder to the container
 COPY zoom-linux-sdk/demo/ /app/demo/
 
 # Build the application
-RUN cd /app/demo && rm -rf bin && rm -rf build && cmake -B build && cd build && make
+RUN cd /app/demo && \
+    rm -rf bin build && \
+    cmake -B build && \
+    cd build && \
+    make
 
 # Set permissions for the setup script
 RUN chmod +x /app/demo/setup-pulseaudio.sh
