@@ -272,7 +272,7 @@ void JoinMeeting() {
     JoinParam4WithoutLogin& withoutloginParam = joinParam.param.withoutloginuserJoin;
     withoutloginParam.meetingNumber = std::stoull(meeting_number);
     withoutloginParam.vanityID = NULL;
-    withoutloginParam.userName = "LinuxChun";
+    withoutloginParam.userName = "Realtime Reporting Tool";
     withoutloginParam.psw = meeting_password.c_str();
     withoutloginParam.customer_key = NULL;
     withoutloginParam.webinarToken = NULL;
