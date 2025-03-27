@@ -27,24 +27,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     g++-multilib \
     libcurl4-openssl-dev \
     libasound2 libasound2-plugins alsa alsa-utils alsa-oss \
-    pulseaudio pulseaudio-utils
+    pulseaudio pulseaudio-utils \
+    dbus dos2unix
 
 WORKDIR /app
 
 COPY zoom-linux-sdk/demo/ /app/demo/
 COPY zoom-linux-sdk/speechsdk/ /app/speechsdk/
 
-# Debug: Verify library presence
+# Setup PulseAudio and Zoom config
+RUN mkdir -p /var/run/dbus && \
+    dbus-uuidgen > /var/lib/dbus/machine-id && \
+    adduser root pulse-access && \
+    adduser root audio && \
+    rm -rf /var/run/pulse /var/lib/pulse /root/.config/pulse && \
+    mkdir -p /root/.config/pulse && \
+    cp -r /etc/pulse/* /root/.config/pulse/ && \
+    mkdir -p /root/.config && \
+    echo -e "[General]\nsystem.audio.type=default" > /root/.config/zoomus.conf
+
+# Debug: Verify setup
 RUN ls -la /app/speechsdk/lib/x64/
 
 RUN cd /app/demo && rm -rf bin && rm -rf build && cmake -B build && cd build && make
 
-RUN chmod +x /app/demo/setup-pulseaudio.sh
-
 WORKDIR /app/demo/bin
 
 RUN echo '#!/bin/bash' > /app/demo/run.sh && \
-    echo '/app/demo/setup-pulseaudio.sh' >> /app/demo/run.sh && \
+    echo 'dbus-daemon --system &' >> /app/demo/run.sh && \
+    echo 'pulseaudio --start --exit-idle-time=-1 --verbose &' >> /app/demo/run.sh && \
+    echo 'sleep 2' >> /app/demo/run.sh && \
+    echo 'pactl load-module module-null-sink sink_name=SpeakerOutput' >> /app/demo/run.sh && \
+    echo 'pactl set-default-sink SpeakerOutput' >> /app/demo/run.sh && \
+    echo 'pactl set-default-source SpeakerOutput.monitor' >> /app/demo/run.sh && \
+    echo 'pactl info' >> /app/demo/run.sh && \
     echo './meetingSDKDemo' >> /app/demo/run.sh
 
 RUN chmod +x /app/demo/run.sh

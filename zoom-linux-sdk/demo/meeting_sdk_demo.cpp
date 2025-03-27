@@ -39,7 +39,6 @@
 #include "meeting_service_components/meeting_recording_interface.h"
 #include "ZoomSDKVideoSource.h"
 #include "ZoomSDKVirtualAudioMicEvent.h"
-
 // JWT generation
 #include "GenerateSDKJwtToken.h"
 
@@ -74,6 +73,7 @@ bool GetVideoRawData = true;
 bool GetAudioRawData = true;
 bool SendVideoRawData = false;
 bool SendAudioRawData = false;
+bool hasJoinedMeeting = false; // New flag to prevent repeated joins
 
 // Helper methods
 uint32_t getUserID() {
@@ -96,41 +96,28 @@ IUserInfo* getUserObj() {
     return returnvalue;
 }
 
-// Raw data recording and sending logic
-void CheckAndStartRawRecording(bool isVideo, bool isAudio) {
-    if (isVideo || isAudio) {
-        m_pRecordController = m_pMeetingService->GetMeetingRecordingController();
-        SDKError err2 = m_pRecordController->CanStartRawRecording();
-        if (err2 == SDKERR_SUCCESS) {
-            SDKError err1 = m_pRecordController->StartRawRecording();
-            if (err1 != SDKERR_SUCCESS) {
-                std::cout << "Error occurred starting raw recording" << std::endl;
-            } else {
-                if (isVideo) {
-                    SDKError err = createRenderer(&videoHelper, videoSource);
-                    if (err != SDKERR_SUCCESS) {
-                        std::cout << "Error occurred" << std::endl;
-                    } else {
-                        std::cout << "attemptToStartRawRecording : subscribing" << std::endl;
-                        videoHelper->setRawDataResolution(ZoomSDKResolution_720P);
-                        videoHelper->subscribe(getUserID(), RAW_DATA_TYPE_VIDEO);
-                    }
-                }
-                if (isAudio) {
-                    audioHelper = GetAudioRawdataHelper();
-                    if (audioHelper) {
-                        SDKError err = audioHelper->subscribe(audio_source);
-                        if (err != SDKERR_SUCCESS) {
-                            std::cout << "Error occurred subscribing to audio : " << err << std::endl;
-                        }
-                    } else {
-                        std::cout << "Error getting audioHelper" << std::endl;
-                    }
+// Inside main file, replace the existing code with this updated version
+void CheckAndStartRawRecording() {
+    if (m_pMeetingService && m_pMeetingService->GetMeetingStatus() == ZOOM_SDK_NAMESPACE::MEETING_STATUS_INMEETING) {
+        if (GetAudioRawData) {
+            if (!audioHelper) {
+                audioHelper = GetAudioRawdataHelper();
+                if (audioHelper) {
+                    std::cout << "Audio helper initialized" << std::endl;
+                } else {
+                    std::cerr << "Failed to initialize audio helper" << std::endl;
+                    return;
                 }
             }
-        } else {
-            std::cout << "Cannot start raw recording: no permissions yet" << std::endl;
+            SDKError err = audioHelper->subscribe(audio_source);
+            if (err == SDKERR_SUCCESS) {
+                std::cout << "Audio subscription called successfully" << std::endl;
+            } else {
+                std::cerr << "Audio subscription failed with error: " << err << std::endl;
+            }
         }
+    } else {
+        std::cout << "Not in meeting yet, status: " << (m_pMeetingService ? m_pMeetingService->GetMeetingStatus() : -1) << std::endl;
     }
 }
 
@@ -163,17 +150,17 @@ void CheckAndStartRawSending(bool isVideo, bool isAudio) {
 // Callbacks
 void onIsHost() {
     printf("Is host now...\n");
-    CheckAndStartRawRecording(GetVideoRawData, GetAudioRawData);
+    CheckAndStartRawRecording();
 }
 
 void onIsCoHost() {
     printf("Is co-host now...\n");
-    CheckAndStartRawRecording(GetVideoRawData, GetAudioRawData);
+    CheckAndStartRawRecording();
 }
 
 void onIsGivenRecordingPermission() {
     printf("Is given recording permissions now...\n");
-    CheckAndStartRawRecording(GetVideoRawData, GetAudioRawData);
+    CheckAndStartRawRecording();
 }
 
 void onInMeeting() {
@@ -183,7 +170,7 @@ void onInMeeting() {
         IList<unsigned int>* participants = m_pMeetingService->GetMeetingParticipantsController()->GetParticipantsList();
         printf("Participants count: %d\n", participants->GetCount());
     }
-    CheckAndStartRawRecording(GetVideoRawData, GetAudioRawData);
+    CheckAndStartRawRecording();
     CheckAndStartRawSending(SendVideoRawData, SendAudioRawData);
 }
 
@@ -238,6 +225,10 @@ void CleanSDK() {
     if (audioHelper) {
         audioHelper->unSubscribe();
     }
+    if (audio_source) {
+        delete audio_source;
+        audio_source = nullptr;
+    }
     err = CleanUPSDK();
     if (err != SDKERR_SUCCESS) {
         std::cerr << "CleanSDK meetingSdk:error " << std::endl;
@@ -246,8 +237,13 @@ void CleanSDK() {
     }
 }
 
-// Join meeting
+// Update JoinMeeting() to initialize audioHelper earlier
 void JoinMeeting() {
+    if (hasJoinedMeeting) {
+        std::cout << "Already joined meeting, skipping JoinMeeting" << std::endl;
+        return;
+    }
+
     std::cerr << "Joining Meeting" << std::endl;
     SDKError err2(SDKERR_SUCCESS);
 
@@ -256,6 +252,14 @@ void JoinMeeting() {
 
     CreateSettingService(&m_pSettingService);
     std::cerr << "Settingservice created." << std::endl;
+
+    // Initialize audioHelper here
+    audioHelper = GetAudioRawdataHelper();
+    if (audioHelper) {
+        std::cout << "Audio helper initialized in JoinMeeting" << std::endl;
+    } else {
+        std::cerr << "Failed to initialize audio helper in JoinMeeting" << std::endl;
+    }
 
     m_pMeetingService->SetEvent(new MeetingServiceEventListener(&onMeetingJoined, &onMeetingEndsQuitApp, &onInMeeting));
     m_pParticipantsController = m_pMeetingService->GetMeetingParticipantsController();
@@ -306,6 +310,7 @@ void JoinMeeting() {
         SDKError err = m_pMeetingService->Join(joinParam);
         if (err == SDKERR_SUCCESS) {
             std::cout << "join_meeting:success" << std::endl;
+            hasJoinedMeeting = true;
         } else {
             std::cout << "join_meeting:error" << std::endl;
         }
